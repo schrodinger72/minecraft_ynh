@@ -60,22 +60,22 @@ path_url=$(ynh_normalize_url_path $path_url)
 # Check web path availability
 ynh_webpath_available $domain $path_url
 # Register (book) web path
-ynh_webpath_register $app $domain $path_url
+ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
 
-ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app path $path_url
-ynh_app_setting_set $app is_public $is_public
+ynh_app_setting_set --app=$app --key=domain --value=$domain
+ynh_app_setting_set --app=$app --key=path --value=$path_url
+ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
 
 # Create a system user
-ynh_system_user_create $app
+ynh_system_user_create --username=$app
 
 #=================================================
 # FIND AND OPEN A PORT
@@ -87,22 +87,22 @@ ynh_system_user_create $app
 ###		- Remove the section "CLOSE A PORT" in the remove script
 
 # Test and open default port
-port_test=$(ynh_find_port $port)
+port_test=$(ynh_find_port --port=$port)
 yunohost firewall allow --no-upnp TCP $port_test 2>&1
-ynh_app_setting_set $app port_test $port_test
+ynh_app_setting_set --app=$app --key=port_test --value=$port_test
 
 # Test and open RCON port
 if [ $rcon = true ]; then
-	port_test1=$(ynh_find_port 25575)
+	port_test1=$(ynh_find_port --port=25575)
 	yunohost firewall allow --no-upnp TCP $port_test1 2>&1
-	ynh_app_setting_set $app port_test1 $port_test1
+	ynh_app_setting_set --app=$app --key=port_test1 --value=$port_test1
 fi
 
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
 
-ynh_print_info "Installing dependencies..."
+ynh_print_info --message="Installing dependencies..."
 
 ### `ynh_install_app_dependencies` allows you to add any "apt" dependencies to the package.
 ### Those deb packages will be installed as dependencies of this package.
@@ -117,13 +117,13 @@ ynh_install_app_dependencies openjdk-11-jre-headless
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
-ynh_app_setting_set $app final_path $final_path
+ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 
 # vanilla has
 if [ $server == "vanilla" ]; then
-	ynh_setup_source -d "$final_path" -s "$server/$version"
+	ynh_setup_source --dest_dir="$final_path" --source_id="$server/$version"
 elif [ $server == "fabric" ]; then
-	ynh_setup_source -d "$final_path" -s "$server/$server"
+	ynh_setup_source --dest_dir="$final_path" --source_id="$server/$server"
 	java -jar $final_path/fabric-installer-0.6.1.51.jar server -dir $final_path -mcversion $version -downloadMinecraft
 fi
 
@@ -131,14 +131,14 @@ fi
 # MODIFY A CONFIG FILE
 #=================================================
 
-ynh_replace_string "__USER__" "$app" "../conf/systemd.service"
-ynh_replace_string "__RAM__" "$ram" "../conf/systemd.service"
-ynh_replace_string "__PATH__" "$final_path" "../conf/systemd.service"
-ynh_replace_string "__OP__" "$op" "../conf/ops.txt"
-ynh_replace_string "__PORT__" "$port" "../conf/server.properties"
-ynh_replace_string "__RCON__" "$rcon" "../conf/server.properties"
-ynh_replace_string "__PASSWD__" "$passwd" "../conf/server.properties"
-ynh_replace_string "__EULA__" "$eula" "../conf/eula.txt"
+ynh_replace_string --match_string="__USER__" --replace_string="$app" --target_file="../conf/systemd.service"
+ynh_replace_string --match_string="__RAM__" --replace_string="$ram" --target_file="../conf/systemd.service"
+ynh_replace_string --match_string="__PATH__" --replace_string="$final_path" --target_file="../conf/systemd.service"
+ynh_replace_string --match_string="__OP__" --replace_string="$op" --target_file="../conf/ops.txt"
+ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="../conf/server.properties"
+ynh_replace_string --match_string="__RCON__" --replace_string="$rcon" --target_file="../conf/server.properties"
+ynh_replace_string --match_string="__PASSWD__" --replace_string="$passwd" --target_file="../conf/server.properties"
+ynh_replace_string --match_string="__EULA__" --replace_string="$eula" --target_file="../conf/eula.txt"
 
 #=================================================
 # SETUP SYSTEMD
@@ -175,10 +175,9 @@ chown -R $app $final_path
 #=================================================
 
 # If app is public, add url to SSOWat conf as skipped_uris
-if [ $is_public -eq 1 ]
-then
+if [ $is_public -eq 1 ]; then
   # unprotected_uris allows SSO credentials to be passed anyway.
-  ynh_app_setting_set "$app" unprotected_uris "/"
+  ynh_app_setting_set --app="$app" --key=unprotected_uris --value="/"
 fi
 
 # Reload services
