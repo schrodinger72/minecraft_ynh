@@ -46,7 +46,7 @@ ynh_remove_nginx_config () {
 #
 # usage: ynh_add_fpm_config
 ynh_add_fpm_config () {
-	finalphpconf="/etc/php5/fpm/pool.d/$app.conf"
+	finalphpconf="/etc/php/7.3/fpm/pool.d/$app.conf"
 	ynh_backup_if_checksum_is_different "$finalphpconf"
 	sudo cp ../conf/php-fpm.conf "$finalphpconf"
 	ynh_replace_string "__NAMETOCHANGE__" "$app" "$finalphpconf"
@@ -57,23 +57,23 @@ ynh_add_fpm_config () {
 
 	if [ -e "../conf/php-fpm.ini" ]
 	then
-		finalphpini="/etc/php5/fpm/conf.d/20-$app.ini"
+		finalphpini="/etc/php/7.3/fpm/conf.d/20-$app.ini"
 		ynh_backup_if_checksum_is_different "$finalphpini"
 		sudo cp ../conf/php-fpm.ini "$finalphpini"
 		sudo chown root: "$finalphpini"
 		ynh_store_file_checksum "$finalphpini"
 	fi
 
-	sudo systemctl reload php5-fpm
+	sudo systemctl reload php7.3-fpm
 }
 
 # Remove the dedicated php-fpm config
 #
 # usage: ynh_remove_fpm_config
 ynh_remove_fpm_config () {
-	ynh_secure_remove "/etc/php5/fpm/pool.d/$app.conf"
-	ynh_secure_remove "/etc/php5/fpm/conf.d/20-$app.ini" 2>&1
-	sudo systemctl reload php5-fpm
+	ynh_secure_remove "/etc/php/7.3/fpm/pool.d/$app.conf"
+	ynh_secure_remove "/etc/php/7.3/fpm/conf.d/20-$app.ini" 2>&1
+	sudo systemctl reload php7.3-fpm
 }
 
 # Create a dedicated systemd config

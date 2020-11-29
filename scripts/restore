@@ -12,8 +12,8 @@ app=$YNH_APP_INSTANCE_NAME
 # Source YunoHost helpers
 source /usr/share/yunohost/helpers
 
-# Stop vintage story
-systemctl stop vintagestory
+# Stop minecraft
+systemctl stop minecraft
 
 # Retrieve old app settings
 domain=$(ynh_app_setting_get "$app" domain)
@@ -51,6 +51,6 @@ cp -a ./nginx.conf "/etc/nginx/conf.d/${domain}.d/${app}.conf"
 # sudo service php5-fpm reload
 ### PHP end ###
 
-# Restart webserver & vintage story
+# Restart webserver & minecraft
 systemctl reload nginx
-systemctl start vintagestory
+systemctl start minecraft
