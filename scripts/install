@@ -21,16 +21,11 @@ ynh_abort_if_errors
 #=================================================
 
 # Retrieve arguments
-domain=$YNH_APP_ARG_DOMAIN
-path_url=$YNH_APP_ARG_PATH
-is_public=$YNH_APP_ARG_IS_PUBLIC
 server=$YNH_APP_ARG_SERVER
 version=$YNH_APP_ARG_VERSION
 ram=$YNH_APP_ARG_RAM
 port=$YNH_APP_ARG_PORT
 op=$YNH_APP_ARG_OP
-rcon=$YNH_APP_ARG_RCON
-passwd=$YNH_APP_ARG_PASSWD
 eula=$YNH_APP_ARG_EULA
 
 ### If it's a multi-instance app, meaning it can be installed several times independently
@@ -54,22 +49,6 @@ app=$YNH_APP_INSTANCE_NAME
 final_path=/home/yunohost.app/$app
 test ! -e "$final_path" || ynh_die "This path already contains a folder"
 
-# Normalize the url path syntax
-path_url=$(ynh_normalize_url_path $path_url)
-
-# Check web path availability
-ynh_webpath_available $domain $path_url
-# Register (book) web path
-ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
-
-#=================================================
-# STORE SETTINGS FROM MANIFEST
-#=================================================
-
-ynh_app_setting_set --app=$app --key=domain --value=$domain
-ynh_app_setting_set --app=$app --key=path --value=$path_url
-ynh_app_setting_set --app=$app --key=is_public --value=$is_public
-
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
@@ -81,22 +60,10 @@ ynh_system_user_create --username=$app
 # FIND AND OPEN A PORT
 #=================================================
 
-### Use these lines if you have to open a port for the application
-### `ynh_find_port` will find the first available port starting from the given port.
-### If you're not using these lines:
-###		- Remove the section "CLOSE A PORT" in the remove script
-
 # Test and open default port
-port_test=$(ynh_find_port --port=$port)
-yunohost firewall allow --no-upnp TCP $port_test 2>&1
-ynh_app_setting_set --app=$app --key=port_test --value=$port_test
-
-# Test and open RCON port
-if [ $rcon = true ]; then
-	port_test1=$(ynh_find_port --port=25575)
-	yunohost firewall allow --no-upnp TCP $port_test1 2>&1
-	ynh_app_setting_set --app=$app --key=port_test1 --value=$port_test1
-fi
+portmc=$(ynh_find_port --port=$port)
+yunohost firewall allow --no-upnp TCP $portmc 2>&1
+ynh_app_setting_set --app=$app --key=portmc --value=$portmc
 
 #=================================================
 # INSTALL DEPENDENCIES
@@ -125,6 +92,7 @@ if [ $server == "vanilla" ]; then
 elif [ $server == "fabric" ]; then
 	ynh_setup_source --dest_dir="$final_path" --source_id="$server/$server"
 	java -jar $final_path/fabric-installer-0.6.1.51.jar server -dir $final_path -mcversion $version -downloadMinecraft
+	ynh_replace_string --match_string="server.jar" --replace_string="fabric-server-launch.jar" --target_file="../conf/systemd.service"
 fi
 
 #=================================================
@@ -136,8 +104,6 @@ ynh_replace_string --match_string="__RAM__" --replace_string="$ram" --target_fil
 ynh_replace_string --match_string="__PATH__" --replace_string="$final_path" --target_file="../conf/systemd.service"
 ynh_replace_string --match_string="__OP__" --replace_string="$op" --target_file="../conf/ops.txt"
 ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="../conf/server.properties"
-ynh_replace_string --match_string="__RCON__" --replace_string="$rcon" --target_file="../conf/server.properties"
-ynh_replace_string --match_string="__PASSWD__" --replace_string="$passwd" --target_file="../conf/server.properties"
 ynh_replace_string --match_string="__EULA__" --replace_string="$eula" --target_file="../conf/eula.txt"
 
 #=================================================
@@ -146,13 +112,6 @@ ynh_replace_string --match_string="__EULA__" --replace_string="$eula" --target_f
 
 ynh_add_systemd_config
 systemctl enable $app.service
-
-#=================================================
-# NGINX CONFIGURATION
-#=================================================
-
-# Create a dedicated nginx config
-ynh_add_nginx_config
 
 #=================================================
 # GENERIC FINALIZATION
@@ -170,16 +129,5 @@ cp -a ../conf/server.properties $final_path/server.properties
 cp -a ../conf/ops.txt $final_path/ops.txt
 chown -R $app $final_path
 
-#=================================================
-# SETUP SSOWAT
-#=================================================
-
-# If app is public, add url to SSOWat conf as skipped_uris
-if [ $is_public -eq 1 ]; then
-  # unprotected_uris allows SSO credentials to be passed anyway.
-  ynh_app_setting_set --app="$app" --key=unprotected_uris --value="/"
-fi
-
 # Reload services
-systemctl reload nginx
 systemctl start $app.service
