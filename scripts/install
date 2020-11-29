@@ -124,9 +124,9 @@ ynh_app_setting_set $app final_path $final_path
 
 # vanilla has
 if [ $server == "vanilla" ]; then
-	ynh_setup_source "$final_path" "$server/$version"
+	ynh_setup_source -d $final_path -s $server/$version
 elif [ $server == "fabric" ]; then
-	ynh_setup_source "$final_path" "$server/$server"
+	ynh_setup_source -d $final_path -s $server/$server
 	java -jar $final_path/fabric-installer-0.6.1.51.jar server -dir $final_path -mcversion $version -downloadMinecraft
 fi
 
