@@ -103,7 +103,7 @@ ynh_replace_string --match_string="__USER__" --replace_string="$app" --target_fi
 ynh_replace_string --match_string="__RAM__" --replace_string="$ram" --target_file="../conf/systemd.service"
 ynh_replace_string --match_string="__PATH__" --replace_string="$final_path" --target_file="../conf/systemd.service"
 ynh_replace_string --match_string="__OP__" --replace_string="$op" --target_file="../conf/ops.txt"
-ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="../conf/server.properties"
+ynh_replace_string --match_string="__PORT__" --replace_string="$portmc" --target_file="../conf/server.properties"
 ynh_replace_string --match_string="__EULA__" --replace_string="$eula" --target_file="../conf/eula.txt"
 
 #=================================================
