@@ -74,6 +74,13 @@ ynh_app_setting_set $app path $path_url
 ynh_app_setting_set $app is_public $is_public
 
 #=================================================
+# CREATE DEDICATED USER
+#=================================================
+
+# Create a system user
+ynh_system_user_create $app
+
+#=================================================
 # FIND AND OPEN A PORT
 #=================================================
 
@@ -82,14 +89,17 @@ ynh_app_setting_set $app is_public $is_public
 ### If you're not using these lines:
 ###		- Remove the section "CLOSE A PORT" in the remove script
 
-# Find a free port
+# Test and open default port
 port_test=$(ynh_find_port $port)
-port_test1=$(ynh_find_port 25575)
-# Open this port
 yunohost firewall allow --no-upnp TCP $port_test 2>&1
-yunohost firewall allow --no-upnp TCP $port_test1 2>&1
 ynh_app_setting_set $app port_test $port_test
-ynh_app_setting_set $app port_test1 $port_test1
+
+# Test and open RCON port
+if [ $rcon -eq 1 ]; then
+	port_test1=$(ynh_find_port 25575)
+	yunohost firewall allow --no-upnp TCP $port_test1 2>&1
+	ynh_app_setting_set $app port_test1 $port_test1
+fi
 
 #=================================================
 # INSTALL DEPENDENCIES
@@ -111,17 +121,24 @@ ynh_install_app_dependencies openjdk-11-jre-headless
 #=================================================
 
 ynh_app_setting_set $app final_path $final_path
-# Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source "$final_path" "$server"
+
+# vanilla has
+if [ $server -eq 'vanilla' ]; then
+	ynh_setup_source "$final_path" "$server/$version"
+elif [ $server -eq 'fabric' ]; then
+	ynh_setup_source "$final_path" "$server/$server"
+	java -jar $final_path/fabric-installer-0.6.1.51.jar server -dir $final_path -mcversion $version -downloadMinecraft
+fi
 
 #=================================================
 # MODIFY A CONFIG FILE
 #=================================================
 
+ynh_replace_string "__USER__" "$app" "../conf/systemd.service"
 ynh_replace_string "__RAM__" "$ram" "../conf/systemd.service"
 ynh_replace_string "__PATH__" "$final_path" "../conf/systemd.service"
-ynh_replace_string "__PORT__" "$port" "../conf/server.properties"
 ynh_replace_string "__OP__" "$op" "../conf/ops.txt"
+ynh_replace_string "__PORT__" "$port" "../conf/server.properties"
 ynh_replace_string "__RCON__" "$rcon" "../conf/server.properties"
 ynh_replace_string "__PASSWD__" "$passwd" "../conf/server.properties"
 ynh_replace_string "__EULA__" "$eula" "../conf/eula.txt"
@@ -141,25 +158,6 @@ systemctl enable $app.service
 ynh_add_nginx_config
 
 #=================================================
-# CREATE DEDICATED USER
-#=================================================
-
-# Create a system user
-#ynh_system_user_create $app
-
-#=================================================
-# STORE THE CONFIG FILE CHECKSUM
-#=================================================
-
-### `ynh_store_file_checksum` is used to store the checksum of a file.
-### That way, during the upgrade script, by using `ynh_backup_if_checksum_is_different`,
-### you can make a backup of this file before modifying it again if the admin had modified it.
-
-# Calculate and store the config file checksum into the app settings
-#ynh_store_file_checksum "/etc/onlyoffice/documentserver/nginx/onlyoffice-documentserver.conf"
-
-
-#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # SECURE FILES AND DIRECTORIES
@@ -173,7 +171,7 @@ ynh_add_nginx_config
 cp -a ../conf/eula.txt $final_path/eula.txt
 cp -a ../conf/server.properties $final_path/server.properties
 cp -a ../conf/ops.txt $final_path/ops.txt
-chown -R admin $final_path
+chown -R $app $final_path
 
 #=================================================
 # SETUP SSOWAT

@@ -1,0 +1,7 @@
+SOURCE_URL=https://maven.fabricmc.net/net/fabricmc/fabric-installer/0.6.1.51/fabric-installer-0.6.1.51.jar
+SOURCE_SUM=b34a15247b1997c7d5ffccc0cf41fad99038b668591c29cc657199c0fa5b4321583d4deeb9975b970d8d812ae5a49563dc10acac03a5bd1a8763c7106967a241
+SOURCE_SUM_PRG=sha512sum
+SOURCE_FORMAT=jar
+SOURCE_IN_SUBDIR=false
+SOURCE_EXTRACT=false
+SOURCE_FILENAME=fabric-installer-0.6.1.51.jar
