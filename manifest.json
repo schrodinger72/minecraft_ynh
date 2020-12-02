@@ -20,7 +20,7 @@
         "install": [
             {
                 "name": "server",
-                "type": "server",
+                "type": "string",
                 "ask": {
                     "en": "Select your server [Fabric supports >= 1.14 or >= 18w43b]",
                     "fr": "Choisir votre serveur [Fabric supporte >= 1.14 ou >= 18w43b]?"
@@ -30,7 +30,7 @@
             },
             {
                 "name": "version",
-                "type": "version",
+                "type": "string",
                 "ask": {
                     "en": "Select your version.",
                     "fr": "Choisir votre version ?"
@@ -40,7 +40,7 @@
             },
             {
                 "name": "port",
-                "type": "port",
+                "type": "string",
                 "ask": {
                     "en": "Select your port.",
                     "fr": "Choisir votre port ?"
@@ -50,7 +50,7 @@
             },
             {
                 "name": "ram",
-                "type": "ram",
+                "type": "string",
                 "ask": {
                     "en": "Set the memory limit for the server. Convert the number to megabytes (MB binary): for example, 2GB = 2048, 4GB = 4096...",
                     "fr": "Définir la mémoire du serveur ? Convertir le chiffre en MegaByte (MB binaire) : soit 2GB = 2048, 4GB = 4096..."
@@ -60,7 +60,7 @@
             },
             {
                 "name": "op",
-                "type": "op",
+                "type": "string",
                 "ask": {
                     "en": "Enter the name of the administrator (minecraft pseudo) !",
                     "fr": "Entrer le nom de l'adminsitrateur (minecraft pseudo) !"
@@ -68,8 +68,18 @@
                 "example": "schrodinger72"
             },
             {
+                "name": "motd",
+                "type": "string",
+                "ask": {
+                    "en": "Enter a description for your server",
+                    "fr": "Entrer une description pour votre serveur"
+                },
+                "example": "My Super Survival Server",
+                "default": "A Minecraft Server"
+            },
+            {
                 "name": "eula",
-                "type": "eula",
+                "type": "string",
                 "ask": {
                     "en": "By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula).",
                     "fr": "En modifiant le paramètre ci-dessous sur TRUE, vous indiquez votre accord avec notre CLUF (https://account.mojang.com/documents/minecraft_eula)."

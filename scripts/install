@@ -27,6 +27,7 @@ ram=$YNH_APP_ARG_RAM
 port=$YNH_APP_ARG_PORT
 op=$YNH_APP_ARG_OP
 eula=$YNH_APP_ARG_EULA
+motd=$YNH_APP_ARG_MOTD
 
 ### If it's a multi-instance app, meaning it can be installed several times independently
 ### The id of the app as stated in the manifest is available as $YNH_APP_ID
@@ -109,6 +110,7 @@ ynh_replace_string --match_string="__RAM__" --replace_string="$ram" --target_fil
 ynh_replace_string --match_string="__PATH__" --replace_string="$final_path" --target_file="../conf/systemd.service"
 ynh_replace_string --match_string="__OP__" --replace_string="$op" --target_file="../conf/ops.txt"
 ynh_replace_string --match_string="__PORT__" --replace_string="$portmc" --target_file="../conf/server.properties"
+ynh_replace_string --match_string="__MOTD__" --replace_string="$motd" --target_file="../conf/server.properties"
 ynh_replace_string --match_string="__EULA__" --replace_string="$eula" --target_file="../conf/eula.txt"
 
 #=================================================
