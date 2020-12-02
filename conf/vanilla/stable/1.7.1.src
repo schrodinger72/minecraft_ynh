@@ -1,0 +1,7 @@
+SOURCE_URL=https://launcher.mojang.com/v1/objects/d26d79675147253b7a35dd32dc5dbba0af1be7e2/server.jar
+SOURCE_SUM=683f546a04eb09d9f8be0d0c5e278f30ee1676b9f94cdc5eb42b0a928e02dd7f5ad4d53d0bbf6f05933a8f3a14234ca1ec8a84a602c899cdac5e6499ec7e7565
+SOURCE_SUM_PRG=sha512sum
+SOURCE_FORMAT=jar
+SOURCE_IN_SUBDIR=false
+SOURCE_EXTRACT=false
+SOURCE_FILENAME=server.jar

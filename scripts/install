@@ -91,7 +91,10 @@ if [ $server == "vanilla" ]; then
 	ynh_setup_source --dest_dir="$final_path" --source_id="$server/$version"
 elif [ $server == "fabric" ]; then
 	ynh_setup_source --dest_dir="$final_path" --source_id="$server/$server"
-	java -jar $final_path/fabric-installer-0.6.1.51.jar server -dir $final_path -mcversion $version -downloadMinecraft
+	$result = java -jar $final_path/fabric-installer-0.6.1.51.jar server -dir $final_path -mcversion $version -downloadMinecraft
+	if [ $result == "1"]; then
+		ynh_die "Fabric unable to download this version (not supported?)"
+  fi
 	ynh_replace_string --match_string="server.jar" --replace_string="fabric-server-launch.jar" --target_file="../conf/systemd.service"
 fi
 
