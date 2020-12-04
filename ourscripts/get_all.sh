@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-stable=$(curl -s https://mcversions.net/ | grep -Eo "/download/[a-zA-Z0-9./?=_%:-]*" | cut -d'/' -f3 | egrep -v "^rd|^c0|^a1|^b1|^inf|w|pre|Pre|rc")
+stable=$(sh list_stable.sh)
+stable_got=0
 for stversionname in $stable; do
     if test -f "../conf/vanilla/stable/$stversionname.src"; then
         continue
@@ -8,6 +9,7 @@ for stversionname in $stable; do
           #echo "$stversionname.src is ignored"
           continue
         else
+          ((stable_got++))
           echo "$stversionname.src does not exist"
           echo "Start download...."
           pathdownload=$(curl -s https://mcversions.net/download/$stversionname| grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*" | grep 'server.jar')
@@ -26,11 +28,13 @@ for stversionname in $stable; do
     fi
 done
 
-snapshot=$(curl -s https://mcversions.net/ | grep -Eo "/download/[a-zA-Z0-9./?=_%:-]*" | cut -d'/' -f3 | egrep -v "3D-" | egrep "w")
+snapshot=$(sh list_snapshot.sh)
+snapshot_got=0
 for snversionname in $snapshot; do
     if test -f "../conf/vanilla/snapshot/$snversionname.src"; then
         continue
     else
+        ((snapshot_got++))
         echo "$snversionname.src does not exist"
         echo "Start download...."
         pathdownload=$(curl -s https://mcversions.net/download/$snversionname| grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*" | grep 'server.jar')
@@ -47,3 +51,8 @@ for snversionname in $snapshot; do
 
     fi
 done
+if [[ $stable_got -ge 1 || $snapshot_got -ge 1 ]]; then
+  echo "Finished. Retrieved: $stable_got stables and $snapshot_got snapshots"
+else
+  echo "Finished. Nothing new"
+fi
